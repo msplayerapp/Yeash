@@ -1,0 +1,24 @@
+name: Generate M3U8
+
+on:
+  push:
+    paths:
+      - 'mp4_links.txt'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Run Shell Script
+        run: bash generate_m3u8.sh
+
+      - name: Commit and Push M3U8 File
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'actions@github.com'
+          git add playlist.m3u8
+          git commit -m 'Auto update playlist.m3u8'
+          git push
