@@ -5,9 +5,8 @@
   <style>
     body {
       margin: 0;
-      padding: 0;
-      overflow-y: scroll;
       background: black;
+      font-family: sans-serif;
     }
     .video-container {
       height: 100vh;
@@ -17,6 +16,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
+      background: black;
     }
     .video-title {
       position: absolute;
@@ -26,7 +26,6 @@
       color: white;
       padding: 8px 12px;
       font-size: 18px;
-      font-family: sans-serif;
       border-radius: 5px;
     }
   </style>
@@ -64,10 +63,10 @@
 
         const videoEl = document.createElement('video');
         videoEl.src = video.url;
-        videoEl.controls = false;
-        videoEl.autoplay = index === 0;
+        videoEl.controls = true;
+        videoEl.autoplay = false;
         videoEl.loop = true;
-        videoEl.muted = true;
+        videoEl.muted = false;
         videoEl.setAttribute('playsinline', 'true');
 
         const titleEl = document.createElement('div');
@@ -79,17 +78,21 @@
         container.appendChild(div);
       });
 
-      // Auto-play on scroll
       const allVideos = document.querySelectorAll('video');
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
+          const vid = entry.target;
           if (entry.isIntersecting) {
-            entry.target.play();
+            vid.play().catch(err => {
+              // Autoplay policy fallback
+              vid.muted = true;
+              vid.play();
+            });
           } else {
-            entry.target.pause();
+            vid.pause();
           }
         });
-      }, { threshold: 0.75 });
+      }, { threshold: 0.8 });
 
       allVideos.forEach(video => observer.observe(video));
     }
