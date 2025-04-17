@@ -1,40 +1,42 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Multi M3U Reels</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reel Player</title>
   <style>
     body {
       margin: 0;
       background: black;
-      overflow: hidden;
-    }
-    #reelContainer {
-      height: 100vh;
-      overflow-y: scroll;
-      scroll-snap-type: y mandatory;
-      scroll-behavior: smooth;
+      color: white;
+      font-family: Arial, sans-serif;
     }
     .video-container {
       position: relative;
+      width: 100%;
       height: 100vh;
-      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      background: black;
     }
-    .video-title {
+    .play-icon {
       position: absolute;
-      bottom: 20px;
-      left: 20px;
-      color: white;
-      font-size: 18px;
-      background: rgba(0, 0, 0, 0.6);
-      padding: 5px 10px;
-      border-radius: 6px;
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.8);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 30px;
+      color: black;
+      display: none;
+      z-index: 10;
     }
     .profile-info {
       position: absolute;
@@ -42,171 +44,140 @@
       left: 20px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 8px 12px;
-      border-radius: 12px;
-    }
-    .profile-info img {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-    }
-    .profile-text {
-      color: white;
-      font-size: 14px;
-      line-height: 1.2;
-    }
-    .profile-text strong {
-      display: block;
-      font-size: 16px;
-    }
-    .play-toggle {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 32px;
-      color: white;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 12px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: none;
-      z-index: 10;
-    }
-    .loader {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      color: white;
-      font-size: 30px;
-      display: none;
       z-index: 5;
     }
-    .touch-area {
+    .profile-info img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 10px;
+      cursor: pointer;
+    }
+    .profile-text {
+      display: flex;
+      flex-direction: column;
+    }
+    /* Popup */
+    #popup {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: none;
+      z-index: 100;
+    }
+    #popupContent {
+      padding: 20px;
+      color: white;
+      overflow-y: auto;
+      max-height: 100vh;
+    }
+    #popup button {
       position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 100px;
-      height: 100px;
-      transform: translate(-50%, -50%);
-      z-index: 2;
+      top: 10px;
+      right: 20px;
+      font-size: 24px;
+      color: white;
+      background: none;
+      border: none;
     }
   </style>
 </head>
 <body>
   <div id="reelContainer"></div>
 
+  <div id="popup">
+    <div id="popupContent"></div>
+    <button onclick="closePopup()">&times;</button>
+  </div>
+
   <script>
-    async function loadReels() {
-      const profileList = await fetch('profile.json').then(res => res.json());
-      const container = document.getElementById('reelContainer');
+    const reelContainer = document.getElementById("reelContainer");
+    const allVideoData = [];
 
-      for (const profile of profileList) {
-        const m3u = await fetch(profile.m3u_link).then(res => res.text());
-        const lines = m3u.split('\n').map(l => l.trim()).filter(Boolean);
-        const videos = [];
+    async function loadJSON() {
+      const response = await fetch("data.json");
+      const data = await response.json();
+      data.forEach(profile => {
+        profile.videos.forEach(video => {
+          const videoWrap = document.createElement("div");
+          videoWrap.className = "video-container";
 
-        for (let i = 0; i < lines.length; i++) {
-          if (lines[i].startsWith('#EXTINF')) {
-            const title = lines[i].split(',')[1] || 'Untitled';
-            const url = lines[i + 1];
-            videos.push({ title, url });
-          }
-        }
-
-        for (const video of videos) {
-          const div = document.createElement('div');
-          div.className = 'video-container';
-
-          const videoEl = document.createElement('video');
+          const videoEl = document.createElement("video");
           videoEl.src = video.url;
-          videoEl.controls = false;
+          videoEl.setAttribute("playsinline", "");
+          videoEl.setAttribute("webkit-playsinline", "");
+          videoEl.autoplay = true;
           videoEl.loop = true;
-          videoEl.setAttribute('playsinline', 'true');
+          videoEl.muted = true;
 
-          const loader = document.createElement('div');
-          loader.className = 'loader';
-          loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+          const playIcon = document.createElement("div");
+          playIcon.className = "play-icon";
+          playIcon.innerHTML = "▶";
 
-          const toggleBtn = document.createElement('div');
-          toggleBtn.className = 'play-toggle';
-          toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-
-          const touchArea = document.createElement('div');
-          touchArea.className = 'touch-area';
-
-          touchArea.addEventListener('click', () => {
-            toggleBtn.style.display = 'block';
-            setTimeout(() => toggleBtn.style.display = 'none', 2000);
+          videoEl.addEventListener("click", (e) => {
+            const rect = videoEl.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            if (x >= rect.width/2 - 50 && x <= rect.width/2 + 50 && y >= rect.height/2 - 50 && y <= rect.height/2 + 50) {
+              playIcon.style.display = "flex";
+              setTimeout(() => playIcon.style.display = "none", 2000);
+            }
           });
 
-          toggleBtn.onclick = () => {
-            if (videoEl.paused) {
-              videoEl.play();
-              toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            } else {
-              videoEl.pause();
-              toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
-            }
-          };
-
-          videoEl.addEventListener('waiting', () => loader.style.display = 'block');
-          videoEl.addEventListener('playing', () => loader.style.display = 'none');
-          videoEl.addEventListener('canplay', () => loader.style.display = 'none');
-
-          const titleEl = document.createElement('div');
-          titleEl.className = 'video-title';
-          titleEl.innerText = video.title;
-
-          const profileEl = document.createElement('div');
-          profileEl.className = 'profile-info';
+          const profileEl = document.createElement("div");
+          profileEl.className = "profile-info";
           profileEl.innerHTML = `
-            <img src="${profile.profile_img}" alt="Profile">
+            <img src="${profile.profile_img}" alt="Profile" onclick="openPopup('${profile.name}')">
             <div class="profile-text">
               <strong>${profile.name}</strong>
               ${profile.sub_name}
             </div>
           `;
 
-          div.appendChild(videoEl);
-          div.appendChild(profileEl);
-          div.appendChild(titleEl);
-          div.appendChild(loader);
-          div.appendChild(toggleBtn);
-          div.appendChild(touchArea);
-          container.appendChild(div);
-        }
-      }
+          videoWrap.appendChild(videoEl);
+          videoWrap.appendChild(playIcon);
+          videoWrap.appendChild(profileEl);
+          reelContainer.appendChild(videoWrap);
 
-      const allVideos = document.querySelectorAll('video');
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          const vid = entry.target;
-          const toggle = vid.parentElement.querySelector('.play-toggle');
-
-          if (entry.isIntersecting) {
-            vid.muted = false;
-            vid.play().then(() => {
-              toggle.innerHTML = '<i class="fas fa-pause"></i>';
-            }).catch(() => {
-              vid.muted = false;
-              vid.play();
-            });
-          } else {
-            vid.pause();
-          }
+          allVideoData.push({ profile, video });
         });
-      }, {
-        threshold: 0.85
       });
-
-      allVideos.forEach(video => observer.observe(video));
     }
 
-    loadReels();
+    function openPopup(profileName) {
+      const popup = document.getElementById("popup");
+      const content = document.getElementById("popupContent");
+      content.innerHTML = `<h2>${profileName}'s Reels</h2><hr style="border-color: #555;">`;
+
+      allVideoData.forEach((item, idx) => {
+        if (item.profile.name === profileName) {
+          const div = document.createElement("div");
+          div.style.padding = "10px 0";
+          div.style.cursor = "pointer";
+          div.style.borderBottom = "1px solid #444";
+          div.innerText = item.video.title;
+
+          div.onclick = () => {
+            const vidContainer = document.querySelectorAll('.video-container')[idx];
+            vidContainer.scrollIntoView({ behavior: 'smooth' });
+            closePopup();
+          };
+
+          content.appendChild(div);
+        }
+      });
+
+      popup.style.display = "block";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+    }
+
+    loadJSON();
   </script>
 </body>
 </html>
