@@ -1,10 +1,9 @@
 {
-  "embed_settings": {
-    "enabled": true,
-    "allowed_domains": [
-      "msmofworld.top"
-    ],
-    "block_all_others": true,
-    "message": "Embedding is only allowed from msmofworld.top"
-  }
+  "version": 2,
+  "routes": [
+    {
+      "src": "/(.*)",
+      "middlewarePath": "middleware"
+    }
+  ]
 }
