@@ -1,319 +1,344 @@
-<!DOCTYPE html>
-<html lang="en">
+<b:if cond='data:blog.pageType == "item"'>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blogger TV Player</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #1e1e1e;
-            color: white;
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .search-container {
-            padding: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
-
-        #search-bar {
-            width: 80%;
-            padding: 10px;
-            background-color: #333;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-size: 16px;
-        }
-
-        /* Dropdown Menu */
-        .dropdown {
-            position: relative;
-            display: inline-block;
-            margin-right: 15px;
-        }
-
-        .dropdown button {
-            background-color: #333;
-            color: white;
-            padding: 12px 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
-
-        .dropdown button:hover {
-            background-color: #555;
-        }
-
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            top: 60px; /* নামানো হলো */
-            background-color: #444;
-            min-width: 160px;
-            z-index: 1;
-            border-radius: 10px;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .dropdown-content a {
-            color: white;
-            padding: 12px 20px;
-            text-decoration: none;
-            display: block;
-            border-bottom: 1px solid #555;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-
-        .dropdown-content a:hover {
-            background-color: #666;
-        }
-
-        .dropdown:hover .dropdown-content {
-            display: block;
-            opacity: 1;
-        }
-
-        .channel-list-container {
-            width: 100%;
-            height: 500px;
-            overflow-y: auto;
-            padding: 10px;
-            box-sizing: border-box;
-            background-color: #333;
-            border-radius: 10px;
-            margin-top: 10px;
-        }
-
-        .channel-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 10px;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        .channel-item {
-            background-color: #444;
-            padding: 10px;
-            border-radius: 10px;
-            text-align: center;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            height: 100%;
-            position: relative;
-        }
-
-        .channel-logo {
-            width: 50%;
-            height: 50px;
-            border-radius: 50%;
-            margin-bottom: 10px;
-            object-fit: cover;
-        }
-
-        .channel-name {
-            font-size: 14px;
-            margin: 5px 0;
-            text-align: center;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-        }
-
-        /* Video Player */
-        .DagPlaArea {
-            display: block;
-            position: relative;
-            background-color: #1e1e1e;
-            z-index: 1000;
-            width: 100%;
-            height: 100%;
-        }
-
-        .player-embed {
-            position: relative;
-            height: 100%;
-            width: 100%;
-        }
-
-        .playerload {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 20px;
-        }
-
-        .playerload img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-
-        .close-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: transparent;
-            border: none;
-            color: white;
-            font-size: 20px;
-            cursor: pointer;
-        }
-    </style>
+<title>My Reel</title>
 </head>
-<body>
+<style>
+    body {
+        background: #000;
+        color: #fff;
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+    }
+    .reels-container {
+        height: 100vh;
+        overflow-y: scroll;
+        -webkit-overflow-scrolling: touch;
+        scroll-snap-type: y mandatory;
+        position: relative;
+    }
+    .reel {
+        height: 100vh;
+        scroll-snap-align: start;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-    <!-- Video Player -->
-    <div class="DagPlaArea">
-        <div id="PlayVideo" class="video-content">
-            <div id="embed_holder">
-                <div class="player-embed" id="pembed">
-                    <div class="playerload">
-                        <img src="https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Player%20Icon/1000010208%20(1).png" alt="Player Logo">
-                        Loading...
-                    </div>
-                    <div id="player_embed">
-                        <div class="pframe">
-                            <iframe src="" frameborder="0" marginwidth="0" marginheight="0" scrolling="NO"
-                                    width="100%" height="100%" allowfullscreen="true" webkitallowfullscreen="true"
-                                    mozallowfullscreen="true"></iframe>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <button class="close-btn" onclick="closePlayer()">X</button>
-        </div>
-    </div>
+    /* লাইভ ভিডিওর জন্য আলাদা স্টাইল */
+    video[data-live="true"] {
+        height: auto;
+    }
 
-    <!-- Search Bar -->
-    <div class="search-container">
-        <div class="dropdown">
-            <button>&#9776;</button> <!-- Menu icon (hamburger) -->
-            <div class="dropdown-content">
-                <a href="javascript:void(0)" onclick="switchTab('all', 'https://m3u.ch/pl/2fd44edbf400d088c04f93bcd179f793_2b2474e48c73fa917a0e2d74658b4d0c.m3u')">All</a>
-                <a href="javascript:void(0)" onclick="switchTab('categories', 'https://example.com/channels2.m3u')">Categories</a>
-                <a href="javascript:void(0)" onclick="switchTab('server1', 'https://example.com/channels1.m3u')">Server 1</a>
-            </div>
-        </div>
-        <input type="text" id="search-bar" placeholder="Search Channels..." oninput="searchChannels()">
-    </div>
+    .play-button {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 70px;
+        height: 70px;
+        cursor: pointer;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.7);
+        border: 2px solid #00bfff; /* নীল রঙ */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.3s ease-in-out;
+        opacity: 0; /* ডিফল্টভাবে প্লে আইকন গোপন থাকবে */
+    }
 
-    <!-- Channel List Container -->
-    <div class="channel-list-container" id="channel-list-container">
-        <div class="channel-list" id="channel-list">
-            <!-- Channel Items will be dynamically added here -->
-        </div>
-    </div>
+    .reel:hover .play-button {
+        opacity: 1; /* স্ক্রিনে টাচ করলে প্লে আইকন দেখাবে */
+    }
 
-    <script>
-        let currentTab = 'all';
-        let m3uLinks = {
-            all: 'https://m3u.ch/pl/2fd44edbf400d088c04f93bcd179f793_2b2474e48c73fa917a0e2d74658b4d0c.m3u',
-            categories: 'https://example.com/channels2.m3u',
-            server1: 'https://example.com/channels1.m3u'
-        };
-        let channels = [];
+    .play-button svg {
+        fill: #00bfff; /* নীল রঙ */
+    }
 
-        function loadM3UData(m3uLink) {
-            fetch(m3uLink)
-                .then(response => response.text())
-                .then(data => {
-                    parseM3UData(data);
-                    displayChannels();
-                })
-                .catch(error => console.error(`Error loading M3U file from ${m3uLink}:`, error));
-        }
+    .loading-icon {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(0, 191, 255, 0.3);
+        border-top: 5px solid #00bfff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: none;
+    }
 
-        function parseM3UData(data) {
-            const lines = data.split('\n');
-            let channel = {};
+    .live-badge {
+        position: absolute;
+        top: 55px; /* প্রোফাইল ব্যাজের নিচে আরো নিচে থাকবে */
+        left: 10px; /* স্ক্রিনের বাম দিকে থাকবে */
+        background: red;
+        color: white;
+        font-size: 14px;
+        font-weight: bold;
+        padding: 6px 12px;
+        border-radius: 15px;
+        display: none;
+    }
+
+    .go-live-button {
+        position: absolute;
+        bottom: 20%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #00bfff;
+        color: white;
+        padding: 15px 25px;
+        border-radius: 25px;
+        font-size: 18px;
+        cursor: pointer;
+        display: none;
+        box-shadow: 0px 0px 8px rgba(0, 191, 255, 0.5);
+    }
+
+    @keyframes spin {
+        0% { transform: translate(-50%, -50%) rotate(0deg); }
+        100% { transform: translate(-50%, -50%) rotate(360deg); }
+    }
+
+    .profile-icon {
+        position: absolute;
+        top: 15px;
+        left: 15px;
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00bfff, #007acc);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        background-size: cover;
+    }
+
+    .video-title {
+        position: absolute;
+        bottom: 20px;
+        left: 15px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #fff;
+        backdrop-filter: blur(5px);
+        transition: 0.3s ease-in-out;
+    }
+
+    .profile-name {
+        position: absolute;
+        top: 15px;
+        left: 60px;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        padding-left: 10px;
+        padding-top: 5px;
+    }
+
+    /* সাব নামের জন্য স্টাইল */
+    .sub-name {
+        position: absolute;
+        top: 35px; /* প্রোফাইল নামের নিচে থাকবে */
+        left: 60px;
+        font-size: 12px; /* প্রোফাইল নামের তুলনায় ছোট হবে */
+        font-weight: normal;
+        color: white;
+        padding-left: 10px;
+    }
+
+    /* 3 ডট মেনুর জন্য CSS */
+    .three-dots-menu {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .three-dots-menu div {
+        width: 6px;
+        height: 6px;
+        background-color: white;
+        border-radius: 50%;
+    }
+
+    .three-dots-menu:hover {
+        background-color: transparent; /* মেনু হোভার করলে কোনো ব্যাকগ্রাউন্ড হবে না */
+    }
+</style>
+
+<div class="reels-container" id="reelsContainer"></div>
+
+<!-- 3 ডট মেনু -->
+<div class="three-dots-menu" id="threeDotsMenu">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    async function loadReels() {
+        const m3uLinks = [
+            {
+                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash%20BD%20TV/Yeash/Yeash.m3u',
+                profileImage: 'https://images.toffeelive.com/images/program/44878/logo/240x240/mobile_logo_764950001725875605.png',
+                profileName: 'User One', // প্রোফাইল নাম
+                subName: 'Sub Name One' // সাব নাম
+            },
+            {
+                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Yeash.m3u',
+                profileImage: 'https://images.toffeelive.com/images/program/19779/logo/240x240/mobile_logo_975410001725875598.png',
+                profileName: 'User Two', // দ্বিতীয় প্রোফাইল নাম
+                subName: 'Sub Name Two' // দ্বিতীয় সাব নাম
+            }
+        ];
+
+        let reels = [];
+
+        for (let link of m3uLinks) {
+            const response = await fetch(link.url);
+            if (!response.ok) return console.error(`Failed to load video from ${link.url}`);
+
+            const text = await response.text();
+            const lines = text.split("\n");
+            let title = "";
+
             lines.forEach(line => {
-                if (line.startsWith('#EXTINF')) {
-                    const info = line.split(',');
-                    const attributes = line.match(/tvg-logo="(.*?)"/);
-                    channel.name = info[1].trim();
-                    channel.m3uLink = lines[lines.indexOf(line) + 1].trim();
-                    channel.logo = attributes ? attributes[1] : 'https://via.placeholder.com/100'; // Default logo
-                    channels.push(channel);
-                    channel = {};
+                if (line.startsWith("#EXTINF")) {
+                    title = line.substring(line.indexOf(",") + 1).trim();
+                } else if (line.startsWith("http")) {
+                    reels.push({ title, url: line.trim(), isLive: line.includes(".m3u8"), profileImage: link.profileImage, profileName: link.profileName, subName: link.subName });
                 }
             });
         }
 
-        function displayChannels() {
-            const channelList = document.getElementById('channel-list');
-            channelList.innerHTML = '';
+        const container = document.getElementById("reelsContainer");
+        reels = reels.sort(() => Math.random() - 0.5);
 
-            channels.forEach(channel => {
-                const channelItem = document.createElement('div');
-                channelItem.classList.add('channel-item');
+        reels.forEach((reel, index) => {
+            let reelElement = document.createElement("div");
+            reelElement.className = "reel";
+            reelElement.innerHTML = `
+                <div class="profile-icon" style="background-image: url(${reel.profileImage});"></div>
+                <div class="profile-name">${reel.profileName}</div>
+                <div class="sub-name">${reel.subName}</div>
+                <video id="video-${index}" data-index="${index}" loop autoplay muted></video>
+                <p class="video-title">${reel.title}</p>
+                <div class="loading-icon" id="loadingIcon-${index}"></div>
+                <div class="live-badge" id="liveBadge-${index}">LIVE</div>
+                <div class="go-live-button" id="goLiveButton-${index}">Go Live TV</div>
+                <div class="play-button" id="playButton-${index}">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <polygon points="8,5 19,12 8,19" />
+                    </svg>
+                </div>
+            `;
+            container.appendChild(reelElement);
 
-                channelItem.innerHTML = `
-                    <img src="${channel.logo}" class="channel-logo" alt="${channel.name}" onclick="playVideo('${channel.m3uLink}')">
-                    <div class="channel-name" onclick="playVideo('${channel.m3uLink}')">${channel.name}</div>
-                `;
+            let video = document.getElementById(`video-${index}`);
+            let loadingIcon = document.getElementById(`loadingIcon-${index}`);
+            let playButton = document.getElementById(`playButton-${index}`);
+            let liveBadge = document.getElementById(`liveBadge-${index}`);
+            let goLiveButton = document.getElementById(`goLiveButton-${index}`);
 
-                channelList.appendChild(channelItem);
+            if (reel.isLive) {
+                if (Hls.isSupported()) {
+                    let hls = new Hls();
+                    hls.loadSource(reel.url);
+                    hls.attachMedia(video);
+                } else {
+                    video.src = reel.url;
+                }
+                video.setAttribute("data-live", "true");
+                goLiveButton.style.display = "block"; 
+                goLiveButton.addEventListener("click", () => {
+                    window.location.href = "https://msmofworld.top";
+                });
+            } else {
+                video.src = reel.url;
+            }
+
+            playButton.addEventListener("click", () => {
+                if (video.paused) {
+                    video.play();
+                    playButton.style.opacity = "0"; 
+                } else {
+                    video.pause();
+                    playButton.style.opacity = "1"; 
+                }
             });
-        }
 
-        function playVideo(m3uLink) {
-            const iframe = document.querySelector('.player-embed iframe');
-            iframe.src = m3uLink;
-            document.getElementById('PlayVideo').style.display = 'block';
-        }
-
-        function switchTab(tab, m3uLink) {
-            currentTab = tab;
-            channels = []; // Reset channels before loading new data
-            loadM3UData(m3uLink);
-        }
-
-        function searchChannels() {
-            const searchQuery = document.getElementById('search-bar').value.toLowerCase();
-            const filteredChannels = channels.filter(channel => channel.name.toLowerCase().includes(searchQuery));
-
-            const channelList = document.getElementById('channel-list');
-            channelList.innerHTML = '';
-
-            filteredChannels.forEach(channel => {
-                const channelItem = document.createElement('div');
-                channelItem.classList.add('channel-item');
-
-                channelItem.innerHTML = `
-                    <img src="${channel.logo}" class="channel-logo" alt="${channel.name}" onclick="playVideo('${channel.m3uLink}')">
-                    <div class="channel-name" onclick="playVideo('${channel.m3uLink}')">${channel.name}</div>
-                `;
-
-                channelList.appendChild(channelItem);
+            video.addEventListener("waiting", () => {
+                loadingIcon.style.display = "block"; 
             });
-        }
 
-        // Initial load
-        loadM3UData(m3uLinks.all);
-    </script>
-</body>
-</html>
+            video.addEventListener("canplay", () => {
+                loadingIcon.style.display = "none"; 
+            });
+
+            video.addEventListener("playing", () => {
+                loadingIcon.style.display = "none"; 
+                if (reel.isLive) {
+                    liveBadge.style.display = "block";
+                }
+            });
+
+            const options = { threshold: 0.5 };
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.play();
+                        entry.target.muted = false;
+                        if (entry.target.getAttribute("data-live") === "true") {
+                            document.getElementById(`liveBadge-${entry.target.dataset.index}`).style.display = "block";
+                        }
+                    } else {
+                        entry.target.pause();
+                        document.getElementById(`liveBadge-${entry.target.dataset.index}`).style.display = "none";
+                    }
+                });
+            }, options);
+            observer.observe(video);
+
+            // স্ক্রিন টাচ হলে প্লে আইকন শো হবে
+            reelElement.addEventListener("touchstart", () => {
+                playButton.style.opacity = "1";
+            });
+
+            reelElement.addEventListener("touchend", () => {
+                if (video.paused) {
+                    playButton.style.opacity = "1";
+                } else {
+                    playButton.style.opacity = "0"; 
+                }
+            });
+        });
+    }
+    loadReels();
+});
+</script>
+</b:if>
