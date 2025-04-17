@@ -1,0 +1,17 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Frame-Options",
+          "value": "ALLOW-FROM https://msmofworld.top"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors https://msmofworld.top"
+        }
+      ]
+    }
+  ]
+}
