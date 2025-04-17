@@ -1,389 +1,71 @@
-<b:if cond='data:blog.pageType == "item"'>
-<head>    
-<title>My Reel</title>
-</head>
-<style>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Random M3U Video Player</title>
+  <style>
     body {
-        background: #000;
-        color: #fff;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-    .reels-container {
-        height: 100vh;
-        overflow-y: scroll;
-        -webkit-overflow-scrolling: touch;
-        scroll-snap-type: y mandatory;
-        position: relative;
-    }
-    .reel {
-        height: 100vh;
-        scroll-snap-align: start;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      background: black;
+      margin: 0;
+      padding: 0;
     }
     video {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+      width: 100%;
+      height: 100vh;
+      object-fit: cover;
     }
-
-    /* লাইভ ভিডিওর জন্য আলাদা স্টাইল */
-    video[data-live="true"] {
-        height: auto;
+    #videoTitle {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      color: white;
+      padding: 8px 12px;
+      font-size: 18px;
+      border-radius: 6px;
+      font-family: sans-serif;
     }
+  </style>
+</head>
+<body>
+  <video id="player" controls autoplay></video>
+  <div id="videoTitle">Loading...</div>
 
-    .play-button {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 70px;
-        height: 70px;
-        cursor: pointer;
-        border-radius: 50%;
-        background: rgba(0, 0, 0, 0.7);
-        border: 2px solid #00bfff; /* নীল রঙ */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: 0.3s ease-in-out;
-        opacity: 0; /* ডিফল্টভাবে প্লে আইকন গোপন থাকবে */
-    }
+  <script>
+    async function loadAndPlay() {
+      const profileRes = await fetch('profile.json');
+      const profile = await profileRes.json();
+      const m3uRes = await fetch(profile.m3u_link);
+      const m3uText = await m3uRes.text();
 
-    .reel:hover .play-button {
-        opacity: 1; /* স্ক্রিনে টাচ করলে প্লে আইকন দেখাবে */
-    }
+      const lines = m3uText.split('\n').map(line => line.trim()).filter(Boolean);
+      const videos = [];
 
-    .play-button svg {
-        fill: #00bfff; /* নীল রঙ */
-    }
-
-    .loading-icon {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 50px;
-        height: 50px;
-        border: 5px solid rgba(0, 191, 255, 0.3);
-        border-top: 5px solid #00bfff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        display: none;
-    }
-
-    .live-badge {
-        position: absolute;
-        top: 55px; /* প্রোফাইল ব্যাজের নিচে আরো নিচে থাকবে */
-        left: 10px; /* স্ক্রিনের বাম দিকে থাকবে */
-        background: red;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 6px 12px;
-        border-radius: 15px;
-        display: none;
-    }
-
-    .go-live-button {
-        position: absolute;
-        bottom: 20%;
-        left: 50%;
-        transform: translateX(-50%);
-        background: #00bfff;
-        color: white;
-        padding: 15px 25px;
-        border-radius: 25px;
-        font-size: 18px;
-        cursor: pointer;
-        display: none;
-        box-shadow: 0px 0px 8px rgba(0, 191, 255, 0.5);
-    }
-
-    @keyframes spin {
-        0% { transform: translate(-50%, -50%) rotate(0deg); }
-        100% { transform: translate(-50%, -50%) rotate(360deg); }
-    }
-
-    .profile-icon {
-        position: absolute;
-        top: 15px;
-        left: 15px;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #00bfff, #007acc);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        background-size: cover;
-    }
-
-    .video-title {
-        position: absolute;
-        bottom: 20px;
-        left: 15px;
-        background: rgba(0, 0, 0, 0.6);
-        padding: 8px 12px;
-        border-radius: 8px;
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-        backdrop-filter: blur(5px);
-        transition: 0.3s ease-in-out;
-    }
-
-    .profile-name {
-        position: absolute;
-        top: 15px;
-        left: 60px;
-        font-size: 14px;
-        font-weight: bold;
-        color: white;
-        padding-left: 10px;
-        padding-top: 5px;
-    }
-
-    /* সাব নামের জন্য স্টাইল */
-    .sub-name {
-        position: absolute;
-        top: 35px; /* প্রোফাইল নামের নিচে থাকবে */
-        left: 60px;
-        font-size: 12px; /* প্রোফাইল নামের তুলনায় ছোট হবে */
-        font-weight: normal;
-        color: white;
-        padding-left: 10px;
-    }
-
-    /* 3 ডট মেনুর জন্য CSS */
-    .three-dots-menu {
-        position: absolute;
-        top: 15px;
-        right: 15px;
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .three-dots-menu div {
-        width: 6px;
-        height: 6px;
-        background-color: white;
-        border-radius: 50%;
-    }
-
-    .three-dots-menu:hover {
-        background-color: transparent; /* মেনু হোভার করলে কোনো ব্যাকগ্রাউন্ড হবে না */
-    }
-</style>
-
-<div class="reels-container" id="reelsContainer"></div>
-
-<!-- 3 ডট মেনু -->
-<div class="three-dots-menu" id="threeDotsMenu">
-    <div></div>
-    <div></div>
-    <div></div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    async function loadReels() {
-        const m3uLinks = [
-            {
-
-                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Yeash.m3u',
-
-                profileImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiwebPrAqP7O5U09KFgbe8OaKVMbukvuVBy7pgbUwTSZlG-V3w1Yx2_ZQfaLNg8i0lBBFWTLPQEocgkI3R2meE-UJMuhOxsn9mvxKsjMzFcmniJ1zDZPS8RyVezDwCpkoItOpOyzqdK6DkicdMl9nxGopU4oCBHgD7ksJWk3XZXUYcuClQ1Ibszc-t8/s800/1000010354.png',
-
-                profileName: 'Yeash Sarker', // দ্বিতীয় প্রোফাইল নাম
-
-                subName: 'content creator' // দ্বিতীয় সাব নাম
-
-            },
-            {
-
-                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Sawpon420/Sawpon420.m3u',
-
-                profileImage: 'https://www.short.icu/kf1nhS7yNd',
-
-                profileName: 'Sawpon', // দ্বিতীয় প্রোফাইল নাম
-
-                subName: 'content creator' // দ্বিতীয় সাব নাম
-
-            },
-          {
-
-                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Rothish142/Rothish142.m3u',
-
-                profileImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiOTvckfuIujB-ss_7J6t6pjoN8-v6-YreiqGsST-5LdBUzJDpk08RzC2AiW4djFORq4vUWSFwFnVPKe4VWbfF0QuB7s2s6ueXHL7OU1YSUFX4u6u644tK260SeMVJqC_5rPreJ0fkg2OGO-N4KBz6FCdtHS9ygYGC0W8J8YHHsNl_3JslHe3Pa-JZZ/s750/1000013228.jpg',
-
-                profileName: 'Rothish Biswas', // দ্বিতীয় প্রোফাইল নাম
-
-                subName: 'content creator' // দ্বিতীয় সাব নাম
-
-            },
-            {
-
-                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Afran321/Afran321.m3u',
-
-                profileImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgsMVDAEKN1-q0tC-s3YR3Q0QxQNhOFnQx3kF0ylWEm6hLa6OeiccwrPsO88F3xssvDNbLPJFa6HACAZgmKEQ4-T2r6fj0FhgYoEGBp0cxaGG-3r10mSjSSUl47uccqgAc3rpLamkP4SDgNxRy4KBj1-dQ0tP4Di2a5ATLgRJ2Ahx5axr0idTm9vkHG/s894/1000013212.jpg',
-
-                profileName: 'Afran', // দ্বিতীয় প্রোফাইল নাম
-
-                subName: 'content creator' // দ্বিতীয় সাব নাম
-
-            },
-          {
-
-                url: 'https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Eiyan322/Eiyan322.m3u',
-
-                profileImage: 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi_jV51BXmJ21Vh3W968XJp52WHKSCJ2Phfxr7OeKaTIx_VbkPbGPdPX-3kfltG8TaRBqzs1upE3ZU0A6i7VfuZyh800JARczdcvy0OgfmTSWPe-xHNX4AsrIREYbIM_pmNzV5xIxinQZ-l5nRg2rpcwrkwovCBSYHbK0HfzFQOpq9EBO6L1D6MsxcF/s720/1000013246.jpg',
-
-                profileName: 'Eiyan Khan', // দ্বিতীয় প্রোফাইল নাম
-
-                subName: 'content creator' // দ্বিতীয় সাব নাম
-
-            },
-        ];
-
-        let reels = [];
-
-        for (let link of m3uLinks) {
-            const response = await fetch(link.url);
-            if (!response.ok) return console.error(`Failed to load video from ${link.url}`);
-
-            const text = await response.text();
-            const lines = text.split("\n");
-            let title = "";
-
-            lines.forEach(line => {
-                if (line.startsWith("#EXTINF")) {
-                    title = line.substring(line.indexOf(",") + 1).trim();
-                } else if (line.startsWith("http")) {
-                    reels.push({ title, url: line.trim(), isLive: line.includes(".m3u8"), profileImage: link.profileImage, profileName: link.profileName, subName: link.subName });
-                }
-            });
+      for (let i = 0; i < lines.length; i++) {
+        if (lines[i].startsWith('#EXTINF')) {
+          const title = lines[i].split(',')[1] || 'Untitled';
+          const url = lines[i + 1];
+          videos.push({ title, url });
         }
+      }
 
-        const container = document.getElementById("reelsContainer");
-        reels = reels.sort(() => Math.random() - 0.5);
+      const player = document.getElementById('player');
+      const titleBox = document.getElementById('videoTitle');
 
-        reels.forEach((reel, index) => {
-            let reelElement = document.createElement("div");
-            reelElement.className = "reel";
-            reelElement.innerHTML = `
-                <div class="profile-icon" style="background-image: url(${reel.profileImage});"></div>
-                <div class="profile-name">${reel.profileName}</div>
-                <div class="sub-name">${reel.subName}</div>
-                <video id="video-${index}" data-index="${index}" loop autoplay muted></video>
-                <p class="video-title">${reel.title}</p>
-                <div class="loading-icon" id="loadingIcon-${index}"></div>
-                <div class="live-badge" id="liveBadge-${index}">LIVE</div>
-                <div class="go-live-button" id="goLiveButton-${index}">Go Live TV</div>
-                <div class="play-button" id="playButton-${index}">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                        <polygon points="8,5 19,12 8,19" />
-                    </svg>
-                </div>
-            `;
-            container.appendChild(reelElement);
+      function playRandomVideo() {
+        const random = Math.floor(Math.random() * videos.length);
+        const video = videos[random];
+        player.src = video.url;
+        titleBox.textContent = video.title;
+        player.play();
+      }
 
-            let video = document.getElementById(`video-${index}`);
-            let loadingIcon = document.getElementById(`loadingIcon-${index}`);
-            let playButton = document.getElementById(`playButton-${index}`);
-            let liveBadge = document.getElementById(`liveBadge-${index}`);
-            let goLiveButton = document.getElementById(`goLiveButton-${index}`);
+      player.addEventListener('ended', playRandomVideo);
 
-            if (reel.isLive) {
-                if (Hls.isSupported()) {
-                    let hls = new Hls();
-                    hls.loadSource(reel.url);
-                    hls.attachMedia(video);
-                } else {
-                    video.src = reel.url;
-                }
-                video.setAttribute("data-live", "true");
-                goLiveButton.style.display = "block"; 
-                goLiveButton.addEventListener("click", () => {
-                    window.location.href = "https://msmofworld.top";
-                });
-            } else {
-                video.src = reel.url;
-            }
-
-            playButton.addEventListener("click", () => {
-                if (video.paused) {
-                    video.play();
-                    playButton.style.opacity = "0"; 
-                } else {
-                    video.pause();
-                    playButton.style.opacity = "1"; 
-                }
-            });
-
-            video.addEventListener("waiting", () => {
-                loadingIcon.style.display = "block"; 
-            });
-
-            video.addEventListener("canplay", () => {
-                loadingIcon.style.display = "none"; 
-            });
-
-            video.addEventListener("playing", () => {
-                loadingIcon.style.display = "none"; 
-                if (reel.isLive) {
-                    liveBadge.style.display = "block";
-                }
-            });
-
-            const options = { threshold: 0.5 };
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.play();
-                        entry.target.muted = false;
-                        if (entry.target.getAttribute("data-live") === "true") {
-                            document.getElementById(`liveBadge-${entry.target.dataset.index}`).style.display = "block";
-                        }
-                    } else {
-                        entry.target.pause();
-                        document.getElementById(`liveBadge-${entry.target.dataset.index}`).style.display = "none";
-                    }
-                });
-            }, options);
-            observer.observe(video);
-
-            // স্ক্রিন টাচ হলে প্লে আইকন শো হবে
-            reelElement.addEventListener("touchstart", () => {
-                playButton.style.opacity = "1";
-            });
-
-            reelElement.addEventListener("touchend", () => {
-                if (video.paused) {
-                    playButton.style.opacity = "1";
-                } else {
-                    playButton.style.opacity = "0"; 
-                }
-            });
-        });
+      // Start with a random video
+      playRandomVideo();
     }
-    loadReels();
-});
-</script>
-</b:if>
 
-
+    loadAndPlay();
+  </script>
+</body>
+</html>
