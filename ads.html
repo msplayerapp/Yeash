@@ -1,8 +1,10 @@
 <!-- ads.html -->
-<div id="ad-popup" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#000000c0; z-index:9999; display:flex; justify-content:center; align-items:center;">
-  <div style="background:white; padding:20px; border-radius:10px; max-width:400px; text-align:center;">
-    <h3>Sponsored Ad</h3>
-    <p>Your ad content goes here...</p>
-    <button onclick="document.getElementById('ad-popup').style.display='none'" style="margin-top:15px;">Close</button>
+<div id="ad-popup" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); z-index:9999;">
+  <div style="background:#fff; padding:20px 30px; border-radius:10px; box-shadow:0 4px 20px rgba(0,0,0,0.2); text-align:center;">
+    <h4>Sponsored Content</h4>
+    <p>This is your ad content. You can place HTML, images or video here.</p>
+    
+    <button id="skip-btn" style="margin-top:15px; padding:8px 20px; display:none;">Skip</button>
+    <div id="countdown" style="margin-top:15px; font-weight:bold;">5</div>
   </div>
 </div>
