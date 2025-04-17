@@ -387,21 +387,44 @@ document.addEventListener("DOMContentLoaded", function() {
 </b:if>
 
 <!-- index.html -->
-
-<!-- যেখানে চান সেখানে বসান -->
 <div id="ad-container"></div>
 
 <script>
   function loadAdPopup() {
     fetch("ads.html")
       .then(res => res.text())
-      .then(data => {
+      .then(html => {
         const adContainer = document.getElementById("ad-container");
-        adContainer.innerHTML = data;
-        document.getElementById("ad-popup").style.display = "flex";
+        adContainer.innerHTML = html;
+
+        const popup = document.getElementById("ad-popup");
+        const skipBtn = document.getElementById("skip-btn");
+        const countdown = document.getElementById("countdown");
+
+        popup.style.display = "block";
+
+        let count = 5;
+        const countInterval = setInterval(() => {
+          count--;
+          countdown.textContent = count;
+          if (count <= 0) {
+            clearInterval(countInterval);
+            countdown.style.display = "none";
+            skipBtn.style.display = "inline-block";
+          }
+        }, 1000);
+
+        // Auto hide after 30 seconds
+        setTimeout(() => {
+          popup.style.display = "none";
+        }, 30000);
+
+        skipBtn.onclick = () => {
+          popup.style.display = "none";
+        };
       });
   }
 
-  // প্রতি ১ মিনিট (৬০,০০০ মিলিসেকেন্ড) পর ad দেখাবে
+  // Show popup every 1 minute
   setInterval(loadAdPopup, 60000);
 </script>
