@@ -6,10 +6,6 @@
         {
           "key": "Content-Security-Policy",
           "value": "frame-ancestors 'self' https://msmofworld.top"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "ALLOW-FROM https://msmofworld.top"
         }
       ]
     }
