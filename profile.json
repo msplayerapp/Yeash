@@ -1,3 +1,14 @@
-{
-  "m3u_link": "https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Rothish142/Rothish142.m3u"
-}
+[
+  {
+    "name": "Toffee Channel",
+    "sub_name": "Entertainment",
+    "m3u_link": "https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Rothish142/Rothish142.m3u",
+    "profile_img": "https://example.com/toffee-logo.png"
+  },
+  {
+    "name": "Music Zone",
+    "sub_name": "Top Tracks",
+    "m3u_link": "https://raw.githubusercontent.com/msplayerapp/-Mitu/refs/heads/main/Yeash/Rothish142/Rothish142.m3u",
+    "profile_img": "https://example.com/music-logo.png"
+  }
+]
