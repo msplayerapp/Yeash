@@ -1,25 +1,5 @@
 <b:if cond='data:blog.pageType == "item"'>
-<head>
-    <script>
-  const isEmbedded = window.top !== window.self;
-  const isAllowedEmbed = document.referrer.includes("msmofworld.top");
-
-  if (!isAllowedEmbed && !isEmbedded) {
-    // ডাইরেক্ট অ্যাক্সেস করা হচ্ছে বা অন্য সাইট থেকে ভিজিট
-    document.write(`
-      <style>
-        body, html { margin: 0; padding: 0; height: 100%; background: black; }
-        #intro { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; }
-      </style>
-      <div id="intro">
-        <video autoplay muted controls width="100%" height="100%" onended="window.location.href='https://msmofworld.top';">
-          <source src="intro.mp4" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-      </div>
-    `);
-  }
-</script>
+<head>    
 <title>My Reel</title>
 </head>
 <style>
