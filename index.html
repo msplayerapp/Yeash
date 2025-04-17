@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Reel Scroll from M3U</title>
+  <title>Reel Scroll with Sound & Loader</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: black;
-      overflow-y: scroll;
       height: 100%;
-      scroll-behavior: smooth;
+      overflow: hidden;
     }
 
     #reelContainer {
-      display: flex;
-      flex-direction: column;
-      scroll-snap-type: y mandatory;
-      overflow-y: scroll;
       height: 100vh;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
     }
 
     .video-container {
       position: relative;
-      width: 100%;
       height: 100vh;
       scroll-snap-align: start;
-      flex-shrink: 0;
     }
 
     video {
@@ -41,9 +37,33 @@
       left: 20px;
       color: white;
       font-size: 18px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 6px 10px;
-      border-radius: 5px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 5px 10px;
+      border-radius: 6px;
+    }
+
+    .play-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      font-size: 24px;
+      color: white;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    .loader {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 30px;
+      display: none;
+      z-index: 1;
     }
   </style>
 </head>
@@ -68,7 +88,7 @@
         }
       }
 
-      // Shuffle videos randomly
+      // Shuffle
       for (let i = videos.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [videos[i], videos[j]] = [videos[j], videos[i]];
@@ -76,7 +96,7 @@
 
       const container = document.getElementById('reelContainer');
 
-      videos.forEach(video => {
+      videos.forEach((video, index) => {
         const div = document.createElement('div');
         div.className = 'video-container';
 
@@ -85,15 +105,37 @@
         videoEl.controls = false;
         videoEl.autoplay = false;
         videoEl.loop = true;
-        videoEl.muted = false;
         videoEl.setAttribute('playsinline', 'true');
+
+        const loader = document.createElement('div');
+        loader.className = 'loader';
+        loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
 
         const titleEl = document.createElement('div');
         titleEl.className = 'video-title';
         titleEl.innerText = video.title;
 
+        const toggleBtn = document.createElement('div');
+        toggleBtn.className = 'play-toggle';
+        toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+        toggleBtn.onclick = () => {
+          if (videoEl.paused) {
+            videoEl.play();
+            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            videoEl.pause();
+            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+        };
+
+        videoEl.addEventListener('waiting', () => loader.style.display = 'block');
+        videoEl.addEventListener('playing', () => loader.style.display = 'none');
+
         div.appendChild(videoEl);
+        div.appendChild(loader);
         div.appendChild(titleEl);
+        div.appendChild(toggleBtn);
         container.appendChild(div);
       });
 
@@ -101,8 +143,13 @@
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const vid = entry.target;
+          const toggle = vid.parentElement.querySelector('.play-toggle');
+
           if (entry.isIntersecting) {
-            vid.play().catch(() => {
+            vid.muted = false;
+            vid.play().then(() => {
+              toggle.innerHTML = '<i class="fas fa-pause"></i>';
+            }).catch(() => {
               vid.muted = true;
               vid.play();
             });
