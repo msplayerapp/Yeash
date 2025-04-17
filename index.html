@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Reel Player</title>
+  <title>Reels</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
   <style>
     body {
@@ -80,27 +80,32 @@
 <div id="reel-container"></div>
 
 <script>
-  const m3uUrl = 'profile.json'; // JSON ফরম্যাটে M3U লিংক থাকবে
+  async function getM3ULinkFromProfile() {
+    const res = await fetch('profile.json');
+    const json = await res.json();
+    return json.m3u;
+  }
 
-  async function fetchM3U(url) {
-    const res = await fetch(url);
-    const data = await res.text();
-    const lines = data.split('\n');
+  async function fetchM3U(m3uUrl) {
+    const res = await fetch(m3uUrl);
+    const text = await res.text();
+    const lines = text.split('\n');
     const videos = [];
 
     for (let i = 0; i < lines.length; i++) {
       if (lines[i].startsWith('#EXTINF')) {
         const title = lines[i].split(',')[1];
         const link = lines[i + 1];
-        videos.push({ title, link });
+        if (title && link) videos.push({ title, link: link.trim() });
       }
     }
 
-    return videos.sort(() => 0.5 - Math.random()); // Randomize
+    return videos.sort(() => 0.5 - Math.random());
   }
 
   async function loadReels() {
-    const reels = await fetchM3U(m3uUrl);
+    const m3uLink = await getM3ULinkFromProfile();
+    const reels = await fetchM3U(m3uLink);
     const container = document.getElementById('reel-container');
 
     reels.forEach(({ title, link }) => {
@@ -108,10 +113,10 @@
       reel.className = 'reel';
 
       const video = document.createElement('video');
-      video.src = link.trim();
+      video.src = link;
       video.setAttribute('playsinline', '');
       video.setAttribute('autoplay', '');
-      video.setAttribute('muted', '');
+      video.setAttribute('muted', 'false');
       video.setAttribute('controls', false);
       video.volume = 1.0;
 
@@ -149,7 +154,7 @@
         loading.innerHTML = '<i class="fas fa-times-circle"></i>';
       });
 
-      // Play Toggle Handling
+      // Play toggle logic
       touchArea.addEventListener('click', () => {
         toggleBtn.style.display = 'flex';
         setTimeout(() => toggleBtn.style.display = 'none', 1500);
@@ -169,7 +174,7 @@
     });
   }
 
-  // Scroll Trigger Auto Play
+  // Scroll autoplay logic
   document.getElementById('reel-container').addEventListener('scroll', () => {
     const reels = document.querySelectorAll('.reel');
     reels.forEach((reel) => {
