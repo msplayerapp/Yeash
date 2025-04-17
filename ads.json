@@ -1,0 +1,11 @@
+[
+  {
+    "html": "<a href='https://example.com'><img src='https://via.placeholder.com/300x100?text=Ad+1'></a>"
+  },
+  {
+    "html": "<a href='https://anotherlink.com'><img src='https://via.placeholder.com/300x100?text=Ad+2'></a>"
+  },
+  {
+    "html": "<a href='https://google.com'><img src='https://via.placeholder.com/300x100?text=Ad+3'></a>"
+  }
+]
