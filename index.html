@@ -385,3 +385,23 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 </script>
 </b:if>
+
+<!-- index.html -->
+
+<!-- যেখানে চান সেখানে বসান -->
+<div id="ad-container"></div>
+
+<script>
+  function loadAdPopup() {
+    fetch("ads.html")
+      .then(res => res.text())
+      .then(data => {
+        const adContainer = document.getElementById("ad-container");
+        adContainer.innerHTML = data;
+        document.getElementById("ad-popup").style.display = "flex";
+      });
+  }
+
+  // প্রতি ১ মিনিট (৬০,০০০ মিলিসেকেন্ড) পর ad দেখাবে
+  setInterval(loadAdPopup, 60000);
+</script>
