@@ -1,15 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Reel Style Player</title>
+  <title>Multi M3U Reels</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
+      margin: 0;
       background: black;
       overflow: hidden;
     }
@@ -23,7 +19,6 @@
       position: relative;
       height: 100vh;
       scroll-snap-align: start;
-      transition: transform 0.3s ease-in-out;
     }
     video {
       width: 100%;
@@ -40,6 +35,31 @@
       background: rgba(0, 0, 0, 0.6);
       padding: 5px 10px;
       border-radius: 6px;
+    }
+    .profile-info {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 8px 12px;
+      border-radius: 12px;
+    }
+    .profile-info img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+    }
+    .profile-text {
+      color: white;
+      font-size: 14px;
+      line-height: 1.2;
+    }
+    .profile-text strong {
+      display: block;
+      font-size: 16px;
     }
     .play-toggle {
       position: absolute;
@@ -81,81 +101,85 @@
 
   <script>
     async function loadReels() {
-      const profileRes = await fetch('profile.json');
-      const profile = await profileRes.json();
-      const m3uRes = await fetch(profile.m3u_link);
-      const m3uText = await m3uRes.text();
-
-      const lines = m3uText.split('\n').map(line => line.trim()).filter(Boolean);
-      const videos = [];
-
-      for (let i = 0; i < lines.length; i++) {
-        if (lines[i].startsWith('#EXTINF')) {
-          const title = lines[i].split(',')[1] || 'Untitled';
-          const url = lines[i + 1];
-          videos.push({ title, url });
-        }
-      }
-
-      // Shuffle videos
-      for (let i = videos.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [videos[i], videos[j]] = [videos[j], videos[i]];
-      }
-
+      const profileList = await fetch('profile.json').then(res => res.json());
       const container = document.getElementById('reelContainer');
 
-      videos.forEach(video => {
-        const div = document.createElement('div');
-        div.className = 'video-container';
+      for (const profile of profileList) {
+        const m3u = await fetch(profile.m3u_link).then(res => res.text());
+        const lines = m3u.split('\n').map(l => l.trim()).filter(Boolean);
+        const videos = [];
 
-        const videoEl = document.createElement('video');
-        videoEl.src = video.url;
-        videoEl.controls = false;
-        videoEl.loop = true;
-        videoEl.setAttribute('playsinline', 'true');
-
-        const loader = document.createElement('div');
-        loader.className = 'loader';
-        loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-        const titleEl = document.createElement('div');
-        titleEl.className = 'video-title';
-        titleEl.innerText = video.title;
-
-        const toggleBtn = document.createElement('div');
-        toggleBtn.className = 'play-toggle';
-        toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-
-        const touchArea = document.createElement('div');
-        touchArea.className = 'touch-area';
-
-        touchArea.addEventListener('click', () => {
-          toggleBtn.style.display = 'block';
-          setTimeout(() => toggleBtn.style.display = 'none', 2000);
-        });
-
-        toggleBtn.onclick = () => {
-          if (videoEl.paused) {
-            videoEl.play();
-            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-          } else {
-            videoEl.pause();
-            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+        for (let i = 0; i < lines.length; i++) {
+          if (lines[i].startsWith('#EXTINF')) {
+            const title = lines[i].split(',')[1] || 'Untitled';
+            const url = lines[i + 1];
+            videos.push({ title, url });
           }
-        };
+        }
 
-        videoEl.addEventListener('waiting', () => loader.style.display = 'block');
-        videoEl.addEventListener('playing', () => loader.style.display = 'none');
-        videoEl.addEventListener('canplay', () => loader.style.display = 'none');
+        for (const video of videos) {
+          const div = document.createElement('div');
+          div.className = 'video-container';
 
-        div.appendChild(videoEl);
-        div.appendChild(loader);
-        div.appendChild(titleEl);
-        div.appendChild(toggleBtn);
-        div.appendChild(touchArea);
-        container.appendChild(div);
-      });
+          const videoEl = document.createElement('video');
+          videoEl.src = video.url;
+          videoEl.controls = false;
+          videoEl.loop = true;
+          videoEl.setAttribute('playsinline', 'true');
+
+          const loader = document.createElement('div');
+          loader.className = 'loader';
+          loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+          const toggleBtn = document.createElement('div');
+          toggleBtn.className = 'play-toggle';
+          toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+
+          const touchArea = document.createElement('div');
+          touchArea.className = 'touch-area';
+
+          touchArea.addEventListener('click', () => {
+            toggleBtn.style.display = 'block';
+            setTimeout(() => toggleBtn.style.display = 'none', 2000);
+          });
+
+          toggleBtn.onclick = () => {
+            if (videoEl.paused) {
+              videoEl.play();
+              toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            } else {
+              videoEl.pause();
+              toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+            }
+          };
+
+          videoEl.addEventListener('waiting', () => loader.style.display = 'block');
+          videoEl.addEventListener('playing', () => loader.style.display = 'none');
+          videoEl.addEventListener('canplay', () => loader.style.display = 'none');
+
+          const titleEl = document.createElement('div');
+          titleEl.className = 'video-title';
+          titleEl.innerText = video.title;
+
+          const profileEl = document.createElement('div');
+          profileEl.className = 'profile-info';
+          profileEl.innerHTML = `
+            <img src="${profile.profile_img}" alt="Profile">
+            <div class="profile-text">
+              <strong>${profile.name}</strong>
+              ${profile.sub_name}
+            </div>
+          `;
+
+          div.appendChild(videoEl);
+          div.appendChild(profileEl);
+          div.appendChild(titleEl);
+          div.appendChild(loader);
+          div.appendChild(toggleBtn);
+          div.appendChild(touchArea);
+          container.appendChild(div);
+        }
+      }
 
       const allVideos = document.querySelectorAll('video');
       const observer = new IntersectionObserver((entries) => {
