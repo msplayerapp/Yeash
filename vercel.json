@@ -3,6 +3,10 @@
   "routes": [
     {
       "src": "/(.*)",
+      "headers": {
+        "X-Frame-Options": "ALLOW-FROM https://www.msmofworld.top",
+        "Content-Security-Policy": "frame-ancestors https://www.msmofworld.top"
+      },
       "middlewarePath": "middleware"
     }
   ]
