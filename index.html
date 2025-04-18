@@ -122,12 +122,11 @@
       display: flex;
       align-items: center;
       gap: 20px;
-      position: relative;
     }
     .popup-content img {
       width: 100px;
       height: 100px;
-      border-radius: 0%; /* Change to square */
+      border-radius: 50%;
       flex-shrink: 0;
     }
     .popup-text {
@@ -155,18 +154,6 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
-    /* Close button positioning inside popup */
-    .close-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      font-size: 20px;
-      color: #00aaff;
-      background: none;
-      border: none;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
@@ -175,7 +162,6 @@
   <!-- Popup -->
   <div id="profilePopup" class="popup">
     <div class="popup-content">
-      <button class="close-btn" onclick="closePopup()"><i class="fas fa-times"></i></button>
       <img id="popupProfileImg" src="" alt="Profile Image">
       <div class="popup-text">
         <h2 id="popupProfileName"></h2>
@@ -291,30 +277,40 @@
           if (entry.isIntersecting) {
             vid.play().then(() => {
               toggle.innerHTML = '<i class="fas fa-pause"></i>';
+              toggle.style.display = 'none';
+            }).catch(() => {
+              toggle.innerHTML = '<i class="fas fa-play"></i>';
+              toggle.style.display = 'block';
             });
           } else {
             vid.pause();
           }
         });
-      }, { threshold: 0.5 });
-
-      document.querySelectorAll('.video-container video').forEach(vid => {
-        observer.observe(vid);
+      }, {
+        threshold: 0.85
       });
+
+      document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
 
     function openProfilePopup(profile) {
-      const popup = document.getElementById('profilePopup');
       document.getElementById('popupProfileImg').src = profile.profile_img;
-      document.getElementById('popupProfileName').innerText = profile.name;
+      document.getElementById('popupProfileName').innerHTML = `
+        ${profile.name}
+        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+      `;
       document.getElementById('popupSubName').innerText = profile.sub_name;
-      document.getElementById('popupTotalReels').innerText = profile.m3u_link;
-      popup.style.display = 'flex';
+      fetch(profile.m3u_link)
+        .then(res => res.text())
+        .then(m3u => {
+          const reelCount = m3u.split('\n').filter(line => line.startsWith('#EXTINF')).length;
+          document.getElementById('popupTotalReels').innerText = reelCount;
+        });
+      document.getElementById('profilePopup').style.display = 'flex';
     }
 
     function closePopup() {
-      const popup = document.getElementById('profilePopup');
-      popup.style.display = 'none';
+      document.getElementById('profilePopup').style.display = 'none';
     }
 
     loadReels();
