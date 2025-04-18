@@ -122,6 +122,7 @@
       display: flex;
       align-items: center;
       gap: 20px;
+      position: relative;
     }
     .popup-content img {
       width: 100px;
@@ -145,13 +146,14 @@
     .popup-text p {
       margin: 0;
     }
-    .popup-content button {
-      margin-top: 10px;
-      padding: 6px 12px;
-      background: #00aaff;
-      color: white;
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+      color: black;
+      background: none;
       border: none;
-      border-radius: 6px;
       cursor: pointer;
     }
   </style>
@@ -162,12 +164,12 @@
   <!-- Popup -->
   <div id="profilePopup" class="popup">
     <div class="popup-content">
+      <button class="close-btn" onclick="closePopup()">×</button>
       <img id="popupProfileImg" src="" alt="Profile Image">
       <div class="popup-text">
         <h2 id="popupProfileName"></h2>
         <p id="popupSubName"></p>
         <p>Total Reels: <span id="popupTotalReels"></span></p>
-        <button onclick="closePopup()">Close</button>
       </div>
     </div>
   </div>
