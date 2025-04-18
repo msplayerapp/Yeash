@@ -46,6 +46,7 @@
       background: rgba(0, 0, 0, 0.5);
       padding: 8px 12px;
       border-radius: 12px;
+      cursor: pointer;
     }
     .profile-info img {
       width: 40px;
@@ -97,10 +98,50 @@
       height: 200px;
       z-index: 2;
     }
+
+    /* Popup styles */
+    .popup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      justify-content: center;
+      align-items: center;
+    }
+    .popup-content {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      width: 80%;
+      color: black;
+    }
+    .popup-content img {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+    }
+    .popup-content h2 {
+      color: #00aaff;
+    }
   </style>
 </head>
 <body>
   <div id="reelContainer"></div>
+
+  <!-- Popup -->
+  <div id="profilePopup" class="popup">
+    <div class="popup-content">
+      <div id="popupProfileImg"></div>
+      <h2 id="popupProfileName"></h2>
+      <p id="popupSubName"></p>
+      <p>Total Reels: <span id="popupTotalReels"></span></p>
+      <button onclick="closePopup()">Close</button>
+    </div>
+  </div>
 
   <script>
     async function loadReels() {
@@ -190,6 +231,9 @@
             ${video.profile.sub_name}
           </div>
         `;
+        
+        // Add click event to open profile popup
+        profileEl.addEventListener('click', () => openProfilePopup(video.profile));
 
         div.appendChild(videoEl);
         div.appendChild(profileEl);
@@ -222,6 +266,28 @@
       });
 
       document.querySelectorAll('video').forEach(video => observer.observe(video));
+    }
+
+    // Function to open the profile popup
+    function openProfilePopup(profile) {
+      document.getElementById('popupProfileImg').innerHTML = `<img src="${profile.profile_img}" alt="Profile Image">`;
+      document.getElementById('popupProfileName').innerText = profile.name + (profile.verified ? ' 🟦' : '');
+      document.getElementById('popupSubName').innerText = profile.sub_name;
+
+      // Fetch total reels from M3U link
+      fetch(profile.m3u_link)
+        .then(res => res.text())
+        .then(m3u => {
+          const reelCount = m3u.split('\n').filter(line => line.startsWith('#EXTINF')).length;
+          document.getElementById('popupTotalReels').innerText = reelCount;
+        });
+
+      document.getElementById('profilePopup').style.display = 'flex';
+    }
+
+    // Function to close the profile popup
+    function closePopup() {
+      document.getElementById('profilePopup').style.display = 'none';
     }
 
     loadReels();
