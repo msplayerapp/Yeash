@@ -8,6 +8,7 @@
       margin: 0;
       background: black;
       overflow: hidden;
+      font-family: sans-serif;
     }
     #reelContainer {
       height: 100vh;
@@ -99,47 +100,70 @@
       z-index: 2;
     }
 
-    /* Popup styles */
-    .popup {
-      display: none;
+    /* Popup Styles */
+    #popupOverlay {
       position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.7);
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.85);
+      display: none;
       justify-content: center;
       align-items: center;
+      z-index: 999;
     }
-    .popup-content {
-      background: white;
+    #popupContent {
+      background: #111;
       padding: 20px;
       border-radius: 10px;
-      max-width: 600px;
-      width: 80%;
-      color: black;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: white;
+      max-width: 90%;
     }
-    .popup-content img {
+    #popupContent img {
       width: 100px;
       height: 100px;
       border-radius: 50%;
     }
-    .popup-content h2 {
-      color: #00aaff;
+    #popupContent h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+    #popupContent h2 i {
+      color: #0095f6;
+      margin-left: 8px;
+    }
+    #popupContent p {
+      margin: 4px 0;
+    }
+    #popupOverlay:target {
+      display: flex;
+    }
+    .close-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      color: white;
+      font-size: 22px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div id="reelContainer"></div>
 
-  <!-- Popup -->
-  <div id="profilePopup" class="popup">
-    <div class="popup-content">
-      <div id="popupProfileImg"></div>
-      <h2 id="popupProfileName"></h2>
-      <p id="popupSubName"></p>
-      <p>Total Reels: <span id="popupTotalReels"></span></p>
-      <button onclick="closePopup()">Close</button>
+  <div id="popupOverlay">
+    <div id="popupContent">
+      <img id="popupImage" src="" alt="Profile">
+      <div>
+        <h2 id="popupName"></h2>
+        <p id="popupSubName"></p>
+        <p id="popupCount"></p>
+      </div>
+      <div class="close-btn" onclick="document.getElementById('popupOverlay').style.display='none';">&times;</div>
     </div>
   </div>
 
@@ -162,6 +186,7 @@
           }
         }
 
+        profile.videoCount = videos.length;
         allVideos.push(...videos);
       }
 
@@ -226,14 +251,19 @@
           <div class="profile-text">
             <strong>
               ${video.profile.name}
-              ${video.profile.verified ? '<i class="fas fa-circle-check" style="color:#0095f6;"></i>' : ''}
+              ${video.profile.verified ? '<i class="fa fa-instagram"></i>' : ''}
             </strong>
             ${video.profile.sub_name}
           </div>
         `;
-        
-        // Add click event to open profile popup
-        profileEl.addEventListener('click', () => openProfilePopup(video.profile));
+
+        profileEl.onclick = () => {
+          document.getElementById('popupImage').src = video.profile.profile_img;
+          document.getElementById('popupName').innerHTML = `${video.profile.name} ${video.profile.verified ? '<i class="fa fa-instagram"></i>' : ''}`;
+          document.getElementById('popupSubName').innerText = video.profile.sub_name;
+          document.getElementById('popupCount').innerText = `Total Reels: ${video.profile.videoCount}`;
+          document.getElementById('popupOverlay').style.display = 'flex';
+        };
 
         div.appendChild(videoEl);
         div.appendChild(profileEl);
@@ -266,28 +296,6 @@
       });
 
       document.querySelectorAll('video').forEach(video => observer.observe(video));
-    }
-
-    // Function to open the profile popup
-    function openProfilePopup(profile) {
-      document.getElementById('popupProfileImg').innerHTML = `<img src="${profile.profile_img}" alt="Profile Image">`;
-      document.getElementById('popupProfileName').innerText = profile.name + (profile.verified ? ' 🟦' : '');
-      document.getElementById('popupSubName').innerText = profile.sub_name;
-
-      // Fetch total reels from M3U link
-      fetch(profile.m3u_link)
-        .then(res => res.text())
-        .then(m3u => {
-          const reelCount = m3u.split('\n').filter(line => line.startsWith('#EXTINF')).length;
-          document.getElementById('popupTotalReels').innerText = reelCount;
-        });
-
-      document.getElementById('profilePopup').style.display = 'flex';
-    }
-
-    // Function to close the profile popup
-    function closePopup() {
-      document.getElementById('profilePopup').style.display = 'none';
     }
 
     loadReels();
