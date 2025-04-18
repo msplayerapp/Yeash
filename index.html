@@ -67,31 +67,30 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 40px;
-      color: #00f;
-      padding: 16px;
+      color: #00aaff;
+      background: none;
+      padding: 14px;
       border-radius: 50%;
       cursor: pointer;
       display: none;
       z-index: 10;
-      background: transparent;
     }
     .loader {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #00f;
+      color: #00aaff;
       font-size: 30px;
       display: none;
       z-index: 5;
     }
     .touch-area {
       position: absolute;
-      top: 50%;
-      left: 50%;
+      top: calc(50% - 100px);
+      left: calc(50% - 100px);
       width: 200px;
       height: 200px;
-      transform: translate(-50%, -50%);
       z-index: 2;
     }
   </style>
@@ -100,17 +99,10 @@
   <div id="reelContainer"></div>
 
   <script>
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
     async function loadReels() {
       const profileList = await fetch('profile.json').then(res => res.json());
       const container = document.getElementById('reelContainer');
+      let allVideos = [];
 
       for (const profile of profileList) {
         const m3u = await fetch(profile.m3u_link).then(res => res.text());
@@ -121,82 +113,87 @@
           if (lines[i].startsWith('#EXTINF')) {
             const title = lines[i].split(',')[1] || 'Untitled';
             const url = lines[i + 1];
-            videos.push({ title, url });
+            videos.push({ title, url, profile });
           }
         }
 
-        shuffleArray(videos);
-
-        for (const video of videos) {
-          const div = document.createElement('div');
-          div.className = 'video-container';
-
-          const videoEl = document.createElement('video');
-          videoEl.src = video.url;
-          videoEl.controls = false;
-          videoEl.loop = true;
-          videoEl.autoplay = true;
-          videoEl.setAttribute('playsinline', 'true');
-
-          const loader = document.createElement('div');
-          loader.className = 'loader';
-          loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-          const toggleBtn = document.createElement('div');
-          toggleBtn.className = 'play-toggle';
-          toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
-
-          const touchArea = document.createElement('div');
-          touchArea.className = 'touch-area';
-
-          touchArea.addEventListener('click', () => {
-            toggleBtn.style.display = 'block';
-            setTimeout(() => {
-              if (!videoEl.paused) toggleBtn.style.display = 'none';
-            }, 2000);
-          });
-
-          toggleBtn.onclick = () => {
-            if (videoEl.paused) {
-              videoEl.play();
-              toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-              setTimeout(() => toggleBtn.style.display = 'none', 2000);
-            } else {
-              videoEl.pause();
-              toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
-              toggleBtn.style.display = 'block';
-            }
-          };
-
-          videoEl.addEventListener('waiting', () => loader.style.display = 'block');
-          videoEl.addEventListener('playing', () => loader.style.display = 'none');
-          videoEl.addEventListener('canplay', () => loader.style.display = 'none');
-
-          const titleEl = document.createElement('div');
-          titleEl.className = 'video-title';
-          titleEl.innerText = video.title;
-
-          const profileEl = document.createElement('div');
-          profileEl.className = 'profile-info';
-          profileEl.innerHTML = `
-            <img src="${profile.profile_img}" alt="Profile">
-            <div class="profile-text">
-              <strong>${profile.name}</strong>
-              ${profile.sub_name}
-            </div>
-          `;
-
-          div.appendChild(videoEl);
-          div.appendChild(profileEl);
-          div.appendChild(titleEl);
-          div.appendChild(loader);
-          div.appendChild(toggleBtn);
-          div.appendChild(touchArea);
-          container.appendChild(div);
-        }
+        allVideos.push(...videos);
       }
 
-      const allVideos = document.querySelectorAll('video');
+      // র‍্যান্ডম শাফল
+      allVideos.sort(() => Math.random() - 0.5);
+
+      for (const video of allVideos) {
+        const div = document.createElement('div');
+        div.className = 'video-container';
+
+        const videoEl = document.createElement('video');
+        videoEl.src = video.url;
+        videoEl.controls = false;
+        videoEl.loop = true;
+        videoEl.setAttribute('playsinline', 'true');
+
+        const loader = document.createElement('div');
+        loader.className = 'loader';
+        loader.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+        const toggleBtn = document.createElement('div');
+        toggleBtn.className = 'play-toggle';
+        toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+
+        const touchArea = document.createElement('div');
+        touchArea.className = 'touch-area';
+        touchArea.addEventListener('click', () => {
+          toggleBtn.style.display = 'block';
+          setTimeout(() => toggleBtn.style.display = 'none', 2000);
+        });
+
+        toggleBtn.onclick = () => {
+          if (videoEl.paused) {
+            videoEl.play();
+            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            videoEl.pause();
+            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+        };
+
+        videoEl.addEventListener('waiting', () => loader.style.display = 'block');
+        videoEl.addEventListener('playing', () => loader.style.display = 'none');
+        videoEl.addEventListener('canplay', () => loader.style.display = 'none');
+
+        videoEl.addEventListener('pause', () => {
+          toggleBtn.style.display = 'block';
+          toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        videoEl.addEventListener('play', () => {
+          toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          setTimeout(() => toggleBtn.style.display = 'none', 1500);
+        });
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'video-title';
+        titleEl.innerText = video.title;
+
+        const profileEl = document.createElement('div');
+        profileEl.className = 'profile-info';
+        profileEl.innerHTML = `
+          <img src="${video.profile.profile_img}" alt="Profile">
+          <div class="profile-text">
+            <strong>${video.profile.name}</strong>
+            ${video.profile.sub_name}
+          </div>
+        `;
+
+        div.appendChild(videoEl);
+        div.appendChild(profileEl);
+        div.appendChild(titleEl);
+        div.appendChild(loader);
+        div.appendChild(toggleBtn);
+        div.appendChild(touchArea);
+        container.appendChild(div);
+      }
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           const vid = entry.target;
@@ -205,8 +202,10 @@
           if (entry.isIntersecting) {
             vid.play().then(() => {
               toggle.innerHTML = '<i class="fas fa-pause"></i>';
-            }).catch(err => {
-              console.log("Autoplay error:", err);
+              toggle.style.display = 'none';
+            }).catch(() => {
+              toggle.innerHTML = '<i class="fas fa-play"></i>';
+              toggle.style.display = 'block';
             });
           } else {
             vid.pause();
@@ -216,7 +215,7 @@
         threshold: 0.85
       });
 
-      allVideos.forEach(video => observer.observe(video));
+      document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
 
     loadReels();
