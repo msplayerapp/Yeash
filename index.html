@@ -155,6 +155,16 @@
       border-radius: 6px;
       cursor: pointer;
     }
+
+    /* New Blue Badge styling */
+    .blue-badge {
+      background-color: #007bff;
+      color: white;
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 12px;
+      margin-left: 10px;
+    }
   </style>
 </head>
 <body>
@@ -165,9 +175,12 @@
     <div class="popup-content">
       <img id="popupProfileImg" src="" alt="Profile Image">
       <div class="popup-text">
-        <h2 id="popupProfileName"></h2>
-        <p id="popupSubName"></p>
-        <p>Total Reels: <span id="popupTotalReels"></span></p>
+        <h2 id="popupProfileName">
+          Profile Name
+          <span id="popupBlueBadge" class="blue-badge"></span>
+        </h2>
+        <p id="popupSubName">Profile Subtitle</p>
+        <p>Total Reels: <span id="popupTotalReels">0</span></p>
         <button onclick="closePopup()">Close</button>
       </div>
     </div>
@@ -299,6 +312,8 @@
       document.getElementById('popupProfileName').innerText = profile.name;
       document.getElementById('popupSubName').innerText = profile.sub_name;
       document.getElementById('popupTotalReels').innerText = profile.reels_count;
+      document.getElementById('popupBlueBadge').innerText = "Verified"; // Example badge text
+
       document.getElementById('profilePopup').style.display = 'flex';
     }
 
