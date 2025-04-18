@@ -67,19 +67,20 @@
       left: 50%;
       transform: translate(-50%, -50%);
       font-size: 48px;
-      color: #2196f3;
-      padding: 18px;
+      color: #00aaff;
+      padding: 20px;
       border-radius: 50%;
       cursor: pointer;
-      z-index: 10;
       display: none;
+      z-index: 10;
+      background: transparent;
     }
     .loader {
       position: absolute;
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      color: #2196f3;
+      color: #00aaff;
       font-size: 30px;
       display: none;
       z-index: 5;
@@ -99,17 +100,12 @@
   <div id="reelContainer"></div>
 
   <script>
-    function shuffleArray(array) {
-      for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-      }
-      return array;
-    }
-
     async function loadReels() {
       const profileList = await fetch('profile.json').then(res => res.json());
       const container = document.getElementById('reelContainer');
+
+      // Shuffle profiles to randomize order
+      profileList.sort(() => Math.random() - 0.5);
 
       for (const profile of profileList) {
         const m3u = await fetch(profile.m3u_link).then(res => res.text());
@@ -124,7 +120,8 @@
           }
         }
 
-        shuffleArray(videos); // Randomize video order
+        // Randomize videos
+        videos.sort(() => Math.random() - 0.5);
 
         for (const video of videos) {
           const div = document.createElement('div');
@@ -149,33 +146,26 @@
 
           touchArea.addEventListener('click', () => {
             toggleBtn.style.display = 'block';
+            setTimeout(() => {
+              if (!videoEl.paused) toggleBtn.style.display = 'none';
+            }, 2000);
           });
 
           toggleBtn.onclick = () => {
             if (videoEl.paused) {
               videoEl.play();
-              toggleBtn.style.display = 'none';
               toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+              toggleBtn.style.display = 'none';
             } else {
               videoEl.pause();
-              toggleBtn.style.display = 'block';
               toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+              toggleBtn.style.display = 'block';
             }
           };
 
           videoEl.addEventListener('waiting', () => loader.style.display = 'block');
-          videoEl.addEventListener('playing', () => {
-            loader.style.display = 'none';
-            toggleBtn.style.display = 'none';
-          });
-          videoEl.addEventListener('pause', () => {
-            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
-            toggleBtn.style.display = 'block';
-          });
-          videoEl.addEventListener('play', () => {
-            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
-            toggleBtn.style.display = 'none';
-          });
+          videoEl.addEventListener('playing', () => loader.style.display = 'none');
+          videoEl.addEventListener('canplay', () => loader.style.display = 'none');
 
           const titleEl = document.createElement('div');
           titleEl.className = 'video-title';
@@ -208,8 +198,20 @@
           const toggle = vid.parentElement.querySelector('.play-toggle');
 
           if (entry.isIntersecting) {
-            vid.muted = false;
-            vid.play().catch(() => vid.muted = true);
+            vid.muted = true;
+            vid.play().then(() => {
+              toggle.innerHTML = '<i class="fas fa-pause"></i>';
+            }).catch(() => {
+              vid.muted = true;
+              vid.play();
+            });
+
+            // প্রথম interaction এ সাউন্ড চালু করে দিন
+            vid.addEventListener('click', () => {
+              vid.muted = false;
+              vid.play();
+            }, { once: true });
+
           } else {
             vid.pause();
           }
