@@ -109,6 +109,7 @@
       border-radius: 10px;
       overflow: hidden;
       box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+      display: none;
     }
     .ad-banner img {
       width: 100%;
@@ -185,7 +186,6 @@
         videoEl.addEventListener('waiting', () => loader.style.display = 'block');
         videoEl.addEventListener('playing', () => loader.style.display = 'none');
         videoEl.addEventListener('canplay', () => loader.style.display = 'none');
-
         videoEl.addEventListener('pause', () => {
           toggleBtn.style.display = 'block';
           toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
@@ -213,11 +213,30 @@
         `;
 
         const ad = ads[Math.floor(Math.random() * ads.length)];
-        const adBanner = document.createElement('a');
-        adBanner.className = 'ad-banner';
-        adBanner.href = ad.link;
-        adBanner.target = '_blank';
-        adBanner.innerHTML = `<img src="${ad.image}" alt="Advertisement">`;
+
+        // Ad container
+        let adElement;
+        if (ad.type === 'image') {
+          adElement = document.createElement('a');
+          adElement.className = 'ad-banner';
+          adElement.href = ad.link;
+          adElement.target = '_blank';
+          adElement.innerHTML = `<img src="${ad.image}" alt="Ad">`;
+        } else if (ad.type === 'script') {
+          adElement = document.createElement('div');
+          adElement.className = 'ad-banner';
+          adElement.innerHTML = ad.code;
+        }
+        adElement.style.display = 'none';
+
+        // Show ad after 50% play
+        let adShown = false;
+        videoEl.addEventListener('timeupdate', () => {
+          if (!adShown && videoEl.currentTime > videoEl.duration * 0.5) {
+            adShown = true;
+            adElement.style.display = 'block';
+          }
+        });
 
         div.appendChild(videoEl);
         div.appendChild(profileEl);
@@ -225,7 +244,7 @@
         div.appendChild(loader);
         div.appendChild(toggleBtn);
         div.appendChild(touchArea);
-        div.appendChild(adBanner);
+        div.appendChild(adElement);
         container.appendChild(div);
       }
 
@@ -233,7 +252,6 @@
         entries.forEach(entry => {
           const vid = entry.target;
           const toggle = vid.parentElement.querySelector('.play-toggle');
-
           if (entry.isIntersecting) {
             vid.play().then(() => {
               toggle.innerHTML = '<i class="fas fa-pause"></i>';
@@ -246,9 +264,7 @@
             vid.pause();
           }
         });
-      }, {
-        threshold: 0.85
-      });
+      }, { threshold: 0.85 });
 
       document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
