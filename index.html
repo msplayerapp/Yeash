@@ -65,8 +65,8 @@
       gap: 5px;
     }
     .profile-text strong img {
-      width: 16px; /* Adjusted size for better matching */
-      height: 16px;
+      width: 14px; /* Adjusted size for matching with the name */
+      height: 14px;
       vertical-align: middle;
     }
     .play-toggle {
@@ -255,7 +255,7 @@
           <div class="profile-text">
             <strong>
               ${video.profile.name}
-              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="14" height="14">` : ''}
             </strong>
             ${video.profile.sub_name}
           </div>
@@ -297,7 +297,7 @@
       document.getElementById('popupProfileImg').src = profile.profile_img;
       document.getElementById('popupProfileName').innerHTML = `
         ${profile.name}
-        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="14" height="14">` : ''}
       `;
       document.getElementById('popupSubName').innerText = profile.sub_name;
       fetch(profile.m3u_link)
@@ -312,13 +312,6 @@
     function closePopup() {
       document.getElementById('profilePopup').style.display = 'none';
     }
-
-    // Close popup when clicking outside
-    window.addEventListener('click', (e) => {
-      if (e.target === document.getElementById('profilePopup')) {
-        closePopup();
-      }
-    });
 
     loadReels();
   </script>
