@@ -1,11 +1,11 @@
 [
   {
-    "html": "<a href='https://example.com'><img src='https://via.placeholder.com/300x100?text=Ad+1'></a>"
+    "type": "image",
+    "image": "https://example.com/banner.jpg",
+    "link": "https://example.com"
   },
   {
-    "html": "<a href='https://anotherlink.com'><img src='https://via.placeholder.com/300x100?text=Ad+2'></a>"
-  },
-  {
-    "html": "<a href='https://google.com'><img src='https://via.placeholder.com/300x100?text=Ad+3'></a>"
+    "type": "script",
+    "code": "<script>alert('This is a script ad!');</script>"
   }
 ]
