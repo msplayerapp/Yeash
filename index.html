@@ -58,8 +58,12 @@
       line-height: 1.2;
     }
     .profile-text strong {
-      display: block;
+      display: flex;
+      align-items: center;
       font-size: 16px;
+    }
+    .profile-text strong i {
+      margin-left: 5px;
     }
     .play-toggle {
       position: absolute;
@@ -120,7 +124,6 @@
         allVideos.push(...videos);
       }
 
-      // র‍্যান্ডম শাফল
       allVideos.sort(() => Math.random() - 0.5);
 
       for (const video of allVideos) {
@@ -180,7 +183,10 @@
         profileEl.innerHTML = `
           <img src="${video.profile.profile_img}" alt="Profile">
           <div class="profile-text">
-            <strong>${video.profile.name}</strong>
+            <strong>
+              ${video.profile.name}
+              ${video.profile.verified ? '<i class="fas fa-circle-check" style="color:#0095f6;"></i>' : ''}
+            </strong>
             ${video.profile.sub_name}
           </div>
         `;
