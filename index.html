@@ -297,7 +297,7 @@
       document.getElementById('popupProfileImg').src = profile.profile_img;
       document.getElementById('popupProfileName').innerHTML = `
         ${profile.name}
-        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="6" height="6">` : ''}
       `;
       document.getElementById('popupSubName').innerText = profile.sub_name;
       fetch(profile.m3u_link)
