@@ -14,11 +14,15 @@
       overflow-y: scroll;
       scroll-snap-type: y mandatory;
       scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
     }
     .video-container {
       position: relative;
       height: 100vh;
       scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     video {
       width: 100%;
@@ -127,7 +131,7 @@
     .popup-content img {
       width: 100px;
       height: 100px;
-      border-radius: 0; /* Updated to make it square */
+      border-radius: 0;
       flex-shrink: 0;
     }
     .popup-text {
@@ -161,7 +165,6 @@
 <body>
   <div id="reelContainer"></div>
 
-  <!-- Popup -->
   <div id="profilePopup" class="popup">
     <div class="popup-content">
       <button class="close-btn" onclick="closePopup()">×</button>
@@ -207,6 +210,9 @@
         videoEl.controls = false;
         videoEl.loop = true;
         videoEl.setAttribute('playsinline', 'true');
+        videoEl.setAttribute('preload', 'auto'); // Preload video
+        videoEl.setAttribute('muted', 'true'); // Avoid autoplay issues on mobile
+        videoEl.defaultMuted = true;
 
         const loader = document.createElement('div');
         loader.className = 'loader';
@@ -257,12 +263,13 @@
           <div class="profile-text">
             <strong>
               ${video.profile.name}
-              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg">` : ''}
             </strong>
             ${video.profile.sub_name}
           </div>
         `;
         profileEl.addEventListener('click', () => openProfilePopup(video.profile));
+
         div.appendChild(videoEl);
         div.appendChild(profileEl);
         div.appendChild(titleEl);
@@ -288,9 +295,7 @@
             vid.pause();
           }
         });
-      }, {
-        threshold: 0.85
-      });
+      }, { threshold: 0.8 });
 
       document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
