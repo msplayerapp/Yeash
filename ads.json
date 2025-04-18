@@ -6,6 +6,17 @@
   },
   {
     "type": "script",
-    "code": "<script>alert('This is a script ad!');</script>"
+    "code": "<script>
+(function(ucoo){
+var d = document,
+    s = d.createElement('script'),
+    l = d.scripts[d.scripts.length - 1];
+s.settings = ucoo || {};
+s.src = "\/\/jucasture.com\/buXlVesQd.Gtl\/0HY-WDcE\/ieWmu9\/ukZzUYlXkpPxTaYQwDNCTZUS1\/M\/DGQ\/tCNhjsAD1YNcTcU\/wINSQk";
+s.async = true;
+s.referrerPolicy = 'no-referrer-when-downgrade';
+l.parentNode.insertBefore(s, l);
+})({})
+</script>"
   }
 ]
