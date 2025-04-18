@@ -1,15 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Multi M3U Reels with Comments and Likes</title>
+  <title>Multi M3U Reels</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
     body {
       margin: 0;
       background: black;
       overflow: hidden;
-      color: white;
     }
     #reelContainer {
       height: 100vh;
@@ -59,6 +57,14 @@
       font-size: 14px;
       line-height: 1.2;
     }
+    .profile-text strong {
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+    }
+    .profile-text strong i {
+      margin-left: 5px;
+    }
     .play-toggle {
       position: absolute;
       top: 50%;
@@ -73,29 +79,42 @@
       display: none;
       z-index: 10;
     }
-    .comment-section, .like-section {
+    .loader {
       position: absolute;
-      bottom: 20px;
-      left: 20px;
-      background: rgba(0, 0, 0, 0.7);
-      padding: 10px;
-      border-radius: 10px;
-      width: 90%;
-    }
-    .comment-box, .like-box {
-      color: white;
-      margin: 5px 0;
-    }
-    .like-box span {
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       color: #00aaff;
+      font-size: 30px;
+      display: none;
+      z-index: 5;
     }
-    .comment-box input {
+    .touch-area {
+      position: absolute;
+      top: calc(50% - 100px);
+      left: calc(50% - 100px);
+      width: 200px;
+      height: 200px;
+      z-index: 2;
+    }
+    .ad-banner {
+      position: absolute;
+      bottom: 70px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 400px;
+      height: auto;
+      z-index: 3;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
+    }
+    .ad-banner img {
       width: 100%;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.2);
-      border: none;
-      border-radius: 4px;
-      color: white;
+      height: auto;
+      display: block;
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -103,11 +122,9 @@
   <div id="reelContainer"></div>
 
   <script>
-    // Function to load and display videos with like and comment system
     async function loadReels() {
       const profileList = await fetch('profile.json').then(res => res.json());
-      const commentsData = await fetch('comment.json').then(res => res.json());
-      const likesData = await fetch('like.json').then(res => res.json());
+      const ads = await fetch('ads.json').then(res => res.json());
 
       const container = document.getElementById('reelContainer');
       let allVideos = [];
@@ -148,6 +165,36 @@
         toggleBtn.className = 'play-toggle';
         toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
 
+        const touchArea = document.createElement('div');
+        touchArea.className = 'touch-area';
+        touchArea.addEventListener('click', () => {
+          toggleBtn.style.display = 'block';
+          setTimeout(() => toggleBtn.style.display = 'none', 2000);
+        });
+
+        toggleBtn.onclick = () => {
+          if (videoEl.paused) {
+            videoEl.play();
+            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          } else {
+            videoEl.pause();
+            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+          }
+        };
+
+        videoEl.addEventListener('waiting', () => loader.style.display = 'block');
+        videoEl.addEventListener('playing', () => loader.style.display = 'none');
+        videoEl.addEventListener('canplay', () => loader.style.display = 'none');
+
+        videoEl.addEventListener('pause', () => {
+          toggleBtn.style.display = 'block';
+          toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+        });
+        videoEl.addEventListener('play', () => {
+          toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+          setTimeout(() => toggleBtn.style.display = 'none', 1500);
+        });
+
         const titleEl = document.createElement('div');
         titleEl.className = 'video-title';
         titleEl.innerText = video.title;
@@ -157,86 +204,53 @@
         profileEl.innerHTML = `
           <img src="${video.profile.profile_img}" alt="Profile">
           <div class="profile-text">
-            <strong>${video.profile.name}</strong>
+            <strong>
+              ${video.profile.name}
+              ${video.profile.verified ? '<i class="fas fa-circle-check" style="color:#0095f6;"></i>' : ''}
+            </strong>
             ${video.profile.sub_name}
           </div>
         `;
 
-        // Display Like Count
-        const likeCount = likesData[video.title] || 0;
-        const likeSection = document.createElement('div');
-        likeSection.className = 'like-section';
-        likeSection.innerHTML = `
-          <div class="like-box">
-            <span>${likeCount} Likes</span>
-            <button class="like-btn" onclick="likeVideo('${video.title}')">Like</button>
-          </div>
-        `;
-
-        // Display Comments
-        const comments = commentsData[video.title] || [];
-        const commentSection = document.createElement('div');
-        commentSection.className = 'comment-section';
-        commentSection.innerHTML = `
-          <div class="comment-box">
-            <h4>Comments:</h4>
-            ${comments.map(comment => `<p><strong>${comment.username}</strong>: ${comment.comment}</p>`).join('')}
-            <input type="text" placeholder="Add a comment" onkeydown="if(event.key === 'Enter'){ addComment('${video.title}') }">
-          </div>
-        `;
+        const ad = ads[Math.floor(Math.random() * ads.length)];
+        const adBanner = document.createElement('a');
+        adBanner.className = 'ad-banner';
+        adBanner.href = ad.link;
+        adBanner.target = '_blank';
+        adBanner.innerHTML = `<img src="${ad.image}" alt="Advertisement">`;
 
         div.appendChild(videoEl);
         div.appendChild(profileEl);
         div.appendChild(titleEl);
         div.appendChild(loader);
         div.appendChild(toggleBtn);
-        div.appendChild(likeSection);
-        div.appendChild(commentSection);
-
+        div.appendChild(touchArea);
+        div.appendChild(adBanner);
         container.appendChild(div);
       }
-    }
 
-    // Like video function
-    function likeVideo(videoTitle) {
-      fetch('like.json')
-        .then(response => response.json())
-        .then(likesData => {
-          likesData[videoTitle] = (likesData[videoTitle] || 0) + 1;
-          updateLikeJSON(likesData);
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          const vid = entry.target;
+          const toggle = vid.parentElement.querySelector('.play-toggle');
+
+          if (entry.isIntersecting) {
+            vid.play().then(() => {
+              toggle.innerHTML = '<i class="fas fa-pause"></i>';
+              toggle.style.display = 'none';
+            }).catch(() => {
+              toggle.innerHTML = '<i class="fas fa-play"></i>';
+              toggle.style.display = 'block';
+            });
+          } else {
+            vid.pause();
+          }
         });
-    }
-
-    // Add comment function
-    function addComment(videoTitle) {
-      const commentText = document.querySelector(`.comment-section input`).value;
-      if (!commentText) return;
-
-      fetch('comment.json')
-        .then(response => response.json())
-        .then(commentsData => {
-          if (!commentsData[videoTitle]) commentsData[videoTitle] = [];
-          commentsData[videoTitle].push({ username: 'Guest', comment: commentText });
-          updateCommentJSON(commentsData);
-        });
-    }
-
-    // Update like.json
-    function updateLikeJSON(likesData) {
-      fetch('like.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(likesData)
+      }, {
+        threshold: 0.85
       });
-    }
 
-    // Update comment.json
-    function updateCommentJSON(commentsData) {
-      fetch('comment.json', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(commentsData)
-      });
+      document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
 
     loadReels();
