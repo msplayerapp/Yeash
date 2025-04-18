@@ -65,10 +65,9 @@
       gap: 5px;
     }
     .profile-text strong img {
-      width: 14px; /* Adjusted size for matching with the name */
-      height: 14px;
+      width: 16px; /* Adjusted size for better matching */
+      height: 16px;
       vertical-align: middle;
-      margin-left: 5px; /* Adding space between the name and the badge */
     }
     .play-toggle {
       position: absolute;
@@ -155,16 +154,6 @@
       border-radius: 6px;
       cursor: pointer;
     }
-
-    /* New Blue Badge styling */
-    .blue-badge {
-      background-color: #007bff;
-      color: white;
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      margin-left: 10px;
-    }
   </style>
 </head>
 <body>
@@ -175,12 +164,9 @@
     <div class="popup-content">
       <img id="popupProfileImg" src="" alt="Profile Image">
       <div class="popup-text">
-        <h2 id="popupProfileName">
-          Profile Name
-          <span id="popupBlueBadge" class="blue-badge"></span>
-        </h2>
-        <p id="popupSubName">Profile Subtitle</p>
-        <p>Total Reels: <span id="popupTotalReels">0</span></p>
+        <h2 id="popupProfileName"></h2>
+        <p id="popupSubName"></p>
+        <p>Total Reels: <span id="popupTotalReels"></span></p>
         <button onclick="closePopup()">Close</button>
       </div>
     </div>
@@ -269,7 +255,7 @@
           <div class="profile-text">
             <strong>
               ${video.profile.name}
-              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="14" height="14">` : ''}
+              ${video.profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
             </strong>
             ${video.profile.sub_name}
           </div>
@@ -309,11 +295,17 @@
 
     function openProfilePopup(profile) {
       document.getElementById('popupProfileImg').src = profile.profile_img;
-      document.getElementById('popupProfileName').innerText = profile.name;
+      document.getElementById('popupProfileName').innerHTML = `
+        ${profile.name}
+        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
+      `;
       document.getElementById('popupSubName').innerText = profile.sub_name;
-      document.getElementById('popupTotalReels').innerText = profile.reels_count;
-      document.getElementById('popupBlueBadge').innerText = "Verified"; // Example badge text
-
+      fetch(profile.m3u_link)
+        .then(res => res.text())
+        .then(m3u => {
+          const reelCount = m3u.split('\n').filter(line => line.startsWith('#EXTINF')).length;
+          document.getElementById('popupTotalReels').innerText = reelCount;
+        });
       document.getElementById('profilePopup').style.display = 'flex';
     }
 
