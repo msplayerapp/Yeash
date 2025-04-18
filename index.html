@@ -68,6 +68,7 @@
       width: 14px; /* Adjusted size for matching with the name */
       height: 14px;
       vertical-align: middle;
+      margin-left: 5px; /* Adding space between the name and the badge */
     }
     .play-toggle {
       position: absolute;
@@ -295,17 +296,9 @@
 
     function openProfilePopup(profile) {
       document.getElementById('popupProfileImg').src = profile.profile_img;
-      document.getElementById('popupProfileName').innerHTML = `
-        ${profile.name}
-        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="14" height="14">` : ''}
-      `;
+      document.getElementById('popupProfileName').innerText = profile.name;
       document.getElementById('popupSubName').innerText = profile.sub_name;
-      fetch(profile.m3u_link)
-        .then(res => res.text())
-        .then(m3u => {
-          const reelCount = m3u.split('\n').filter(line => line.startsWith('#EXTINF')).length;
-          document.getElementById('popupTotalReels').innerText = reelCount;
-        });
+      document.getElementById('popupTotalReels').innerText = profile.reels_count;
       document.getElementById('profilePopup').style.display = 'flex';
     }
 
