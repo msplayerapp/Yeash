@@ -97,26 +97,6 @@
       height: 200px;
       z-index: 2;
     }
-    .ad-banner {
-      position: absolute;
-      bottom: 70px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 90%;
-      max-width: 400px;
-      height: auto;
-      z-index: 3;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 12px rgba(255, 255, 255, 0.1);
-      display: none;
-    }
-    .ad-banner img {
-      width: 100%;
-      height: auto;
-      display: block;
-      border-radius: 10px;
-    }
   </style>
 </head>
 <body>
@@ -125,8 +105,6 @@
   <script>
     async function loadReels() {
       const profileList = await fetch('profile.json').then(res => res.json());
-      const ads = await fetch('ads.json').then(res => res.json());
-
       const container = document.getElementById('reelContainer');
       let allVideos = [];
 
@@ -186,6 +164,7 @@
         videoEl.addEventListener('waiting', () => loader.style.display = 'block');
         videoEl.addEventListener('playing', () => loader.style.display = 'none');
         videoEl.addEventListener('canplay', () => loader.style.display = 'none');
+
         videoEl.addEventListener('pause', () => {
           toggleBtn.style.display = 'block';
           toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
@@ -212,39 +191,12 @@
           </div>
         `;
 
-        const ad = ads[Math.floor(Math.random() * ads.length)];
-
-        // Ad container
-        let adElement;
-        if (ad.type === 'image') {
-          adElement = document.createElement('a');
-          adElement.className = 'ad-banner';
-          adElement.href = ad.link;
-          adElement.target = '_blank';
-          adElement.innerHTML = `<img src="${ad.image}" alt="Ad">`;
-        } else if (ad.type === 'script') {
-          adElement = document.createElement('div');
-          adElement.className = 'ad-banner';
-          adElement.innerHTML = ad.code;
-        }
-        adElement.style.display = 'none';
-
-        // Show ad after 50% play
-        let adShown = false;
-        videoEl.addEventListener('timeupdate', () => {
-          if (!adShown && videoEl.currentTime > videoEl.duration * 0.5) {
-            adShown = true;
-            adElement.style.display = 'block';
-          }
-        });
-
         div.appendChild(videoEl);
         div.appendChild(profileEl);
         div.appendChild(titleEl);
         div.appendChild(loader);
         div.appendChild(toggleBtn);
         div.appendChild(touchArea);
-        div.appendChild(adElement);
         container.appendChild(div);
       }
 
@@ -252,6 +204,7 @@
         entries.forEach(entry => {
           const vid = entry.target;
           const toggle = vid.parentElement.querySelector('.play-toggle');
+
           if (entry.isIntersecting) {
             vid.play().then(() => {
               toggle.innerHTML = '<i class="fas fa-pause"></i>';
@@ -264,7 +217,9 @@
             vid.pause();
           }
         });
-      }, { threshold: 0.85 });
+      }, {
+        threshold: 0.85
+      });
 
       document.querySelectorAll('video').forEach(video => observer.observe(video));
     }
