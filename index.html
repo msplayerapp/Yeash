@@ -64,6 +64,11 @@
       font-size: 16px;
       gap: 5px;
     }
+    .profile-text strong img {
+      width: 16px; /* Adjusted size for better matching */
+      height: 16px;
+      vertical-align: middle;
+    }
     .play-toggle {
       position: absolute;
       top: 50%;
@@ -292,7 +297,7 @@
       document.getElementById('popupProfileImg').src = profile.profile_img;
       document.getElementById('popupProfileName').innerHTML = `
         ${profile.name}
-        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="18" height="18">` : ''}
+        ${profile.verified ? `<img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Twitter_Verified_Badge.svg" width="16" height="16">` : ''}
       `;
       document.getElementById('popupSubName').innerText = profile.sub_name;
       fetch(profile.m3u_link)
